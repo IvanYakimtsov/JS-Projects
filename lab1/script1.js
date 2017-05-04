@@ -1,7 +1,7 @@
 window.onload = function(){
 	
 	
-	
+	var time;
 	
     function Pair(val1,val2 ){
 		
@@ -11,7 +11,8 @@ window.onload = function(){
 	
 	this.val1BaseTwo;
 	this.val2BaseTwo;
-	this.currentStateValue;
+	this.currentStateValueAfterShift;
+	this.currentStateValueBeforShift;
 	
 	
 	this.operation = function(index){
@@ -42,15 +43,17 @@ window.onload = function(){
 			
 		}
 		
-	
-
+		this.currentStateValueBeforShift="";
+		for(var i=0; i<this.currentState.length;i++){
+			this.currentStateValueBeforShift+=this.currentState[i];
+		}
 		
 		if(buf) this.currentState.unshift(1);
 			else this.currentState.unshift(0);
 			
-		this.currentStateValue="";
+		this.currentStateValueAfterShift="";
 		for(var i=0; i<this.currentState.length;i++){
-			this.currentStateValue+=this.currentState[i];
+			this.currentStateValueAfterShift+=this.currentState[i];
 		}
 		
 		
@@ -88,31 +91,58 @@ window.onload = function(){
 		var table=document.getElementById('mainTable');
 		table = table.firstChild;
 		
+		var temp_obj = [];
 		var temp_rez = [];
 		
 		for(var i=0;i<8;i++){
-			temp_rez=[];
+			temp_obj = [];
 			for(var j = 0; j< pairToCount.length; j++) {
 			pairToCount[j].operation(i);
-			
-			temp_rez.push(new Result(pairToCount[j].val1BaseTwo,pairToCount[j].val2BaseTwo,pairToCount[j].currentStateValue));
+			temp_rez=[];
+			temp_rez.push(new Result(pairToCount[j].val1BaseTwo,pairToCount[j].val2BaseTwo,pairToCount[j].currentStateValueBeforShift));
+			temp_rez.push(new Result(pairToCount[j].val1BaseTwo,pairToCount[j].val2BaseTwo,pairToCount[j].currentStateValueAfterShift));
+			temp_obj.push(temp_rez);
 			}
-			states.push(temp_rez);
+			states.push(temp_obj);
 		}
 		
 		var index = 0;
 		
-		for(var numberOfObject = 0; numberOfObject<pairToCount.length;numberOfObject++){
+	/*	for(var numberOfObject = 0; numberOfObject<pairToCount.length*2;numberOfObject+=2){
 			index=numberOfObject+1;
-			for(var operation = 0; operation<8;operation++){
-			 table.childNodes[index].childNodes[operation+1].innerHTML="A: "+states[operation][numberOfObject].val1BaseTwo+ "<br>" +" B: "
+			var count = 0;
+			for(var operation = 0; operation<states.length;operation++){
+			 table.childNodes[index].childNodes[count].innerHTML="A: "+states[operation][numberOfObject].val1BaseTwo+ "<br>" +" B: "
 			 +states[operation][numberOfObject].val2BaseTwo + "<br>" +"result: "+states[operation][numberOfObject].currentStateValue + "<br>"+
 			 "Time: " + (index);	
 			 index++;
+			 count++;
+			 table.childNodes[index].childNodes[count].innerHTML="A: "+states[operation][numberOfObject+1].val1BaseTwo+ "<br>" +" B: "
+			 +states[operation][numberOfObject].val2BaseTwo + "<br>" +"result: "+states[operation][numberOfObject+1].currentStateValue + "<br>"+
+			 "Time: " + (index);	
+			 index++;
+			 count++;
 			}
+		}*/
+
+
+		for(var numberOfObject = 0; numberOfObject<pairToCount.length;numberOfObject++){
+			index=numberOfObject+1;
+			var count = 0;
+			for(var operation = 0; operation<states.length;operation++){
+			 table.childNodes[index].childNodes[count+1].innerHTML="A: "+states[operation][numberOfObject][0].val1BaseTwo+ "<br>" +" B: "
+			 +states[operation][numberOfObject][0].val2BaseTwo + "<br>" +"result: "+states[operation][numberOfObject][0].currentStateValue + "<br>"+
+			 "Time: " + (index)*time;	
+			 index++;
+			 count++;
+			 table.childNodes[index].childNodes[count+1].innerHTML="A: "+states[operation][numberOfObject][1].val1BaseTwo+ "<br>" +" B: "
+			 +states[operation][numberOfObject][1].val2BaseTwo + "<br>" +"result: "+states[operation][numberOfObject][1].currentStateValue + "<br>"+
+			 "Time: " + (index)*time;	
+			 index++;
+			 count++;
+			}
+	
 		}
-		
-		
 	}
 	
 	//--------------------------------------------------------------------------------------------
@@ -130,21 +160,21 @@ window.onload = function(){
 			table.innerHTML = "<tr></tr>";
 			table = table.firstChild;
 			
-			 for (var i=0; i<8+paramValue; i++){
+			 for (var i=0; i<16+paramValue; i++){
 				 table.innerHTML += "<tr></tr>";
 
 			 }		 
 		
 		
 			
-			 for (var i=0; i<9+paramValue; i++){
+			 for (var i=0; i<17+paramValue; i++){
 				 
-				 for (var j=0; j<9; j++)  table.childNodes[i].innerHTML += "<td></td>";
+				 for (var j=0; j<17; j++)  table.childNodes[i].innerHTML += "<td></td>";
 				 
 		
 			 }
 			 
-			 for (var i=1; i<9; i++) {
+			 for (var i=1; i<17; i++) {
 				 table.firstChild.childNodes[i].innerHTML = "Step " + i;
 				
 			}
@@ -185,10 +215,10 @@ window.onload = function(){
 		var elementsValue = document.forms["slick-login"].elements["number"];
 		
 		
-		for(var i = 0; i<elementsValue.length; i+=2){
+		for(var i = 0; i<elementsValue.length-1; i+=2){
 			
 			if(elementsValue[i].value>255 || elementsValue[i+1].value>255) {
-				alert("¬ведено число больше 255");
+				alert("ведено число больше 255");
 				elementsValue[i].value = null;
 				elementsValue[i+1].value = null;
 				return;
@@ -200,13 +230,16 @@ window.onload = function(){
 
 		var val1;
 		var val2;
-		
-		for(var i = 0; i<elementsValue.length; i+=2){
+		var x;
+		for(var i = 0; i<elementsValue.length-1; i+=2){
 			val1 = valParsToBaseTwo(elementsValue[i].value);
 			val2 = valParsToBaseTwo(elementsValue[i+1].value);
 			pairToCount.push(new Pair(val1,val2));
-	      
+			x = i+2;
 		}
+		
+		time = elementsValue[x].value;
+		
 		
 		for(var i = 0; i<pairToCount.length; i++){
 			pairToCount[i].val1BaseTwo="";
