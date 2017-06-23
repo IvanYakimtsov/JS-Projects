@@ -1,3 +1,6 @@
+/**
+ * Created by Ivan Yakimtsov.
+ */
 window.onload = function(){
 	
 	
